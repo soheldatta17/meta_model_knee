@@ -1,9 +1,6 @@
 # predict.py — KOA Meta-Ensemble v4.0 inference
-# Run in Google Colab. Downloads all models from Drive, loads the saved
-# pipeline bundle, and predicts KL grade for every .png in IMAGE_DIR.
-
-from google.colab import drive
-drive.mount("/content/drive")
+# Works on Kaggle (or Colab). Downloads all models via gdown, loads the
+# saved pipeline bundle, and predicts KL grade for every .png in IMAGE_DIR.
 
 import subprocess, sys
 
@@ -22,29 +19,28 @@ except ImportError:
 DRIVE_ASSETS = {
     "model1": {
         "id"   : "1orbyJ0UU44HT3G8inoGstlJ0DhJlQXjj",
-        "local": "/content/best_knee_ensemble_cbam.pt",
+        "local": "/kaggle/working/best_knee_ensemble_cbam.pt",
         "desc" : "Model 1 - CBAM Ensemble (TorchScript) [severity 5-class]",
     },
     "model2": {
         "id"   : "1Hr4gHki9nl6nmXPO0xsAU7FnlfqldHZ8",
-        "local": "/content/final_knee_cnn_model.keras",
+        "local": "/kaggle/working/final_knee_cnn_model.keras",
         "desc" : "Model 2 - Keras CNN + SE Block [JSN regression -> 2-bin]",
     },
     "model3": {
         "id"   : "16ozIZmH36J0K90bY9Jfe4YDTvS2SDDPh",
-        "local": "/content/final_mmorphattention.pt",
+        "local": "/kaggle/working/final_mmorphattention.pt",
         "desc" : "Model 3 - MorphAttention (TorchScript) [morph 4-class -> 2]",
     },
     "bundle": {
-        "id"   : "1asiAmtlq5t3dcBfv56kUOWQfUlOgaEv8",          # <-- replace with your Drive ID
-        "local": "/content/full_pipeline_bundle.pkl",
+        "id"   : "1asiAmtlq5t3dcBfv56kUOWQfUlOgaEv8",
+        "local": "/kaggle/working/full_pipeline_bundle.pkl",
         "desc" : "Pipeline bundle (XGBoost + scaler + head weights)",
     },
 }
 
-
 # ── IMAGE_DIR: folder containing .png files to predict ───────────────────────
-IMAGE_DIR = "/content/images"   # <-- change to your folder path
+IMAGE_DIR = "/kaggle/input/datasets/soheldatta17/img123"   # <-- change to your dataset path
 
 # ── download helper ───────────────────────────────────────────────────────────
 import os
@@ -56,7 +52,7 @@ def _gdrive_download(key: str) -> str:
         print(f"  [cached] {asset['desc']}  ({os.path.getsize(local)/1e6:.1f} MB)")
         return local
     print(f"  [download] {asset['desc']} ...")
-    gdown.download(f"https://drive.google.com/uc?id={asset['id']}", local, quiet=False)
+    gdown.download(f"https://drive.google.com/uc?id={asset['id']}", local, quiet=False, fuzzy=True)
     if not os.path.exists(local):
         raise RuntimeError(f"Download failed for {asset['desc']}. Check Drive share settings.")
     print(f"  saved -> {local}  ({os.path.getsize(local)/1e6:.1f} MB)")
